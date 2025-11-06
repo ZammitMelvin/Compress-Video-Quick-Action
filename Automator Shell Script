@@ -1,0 +1,29 @@
+# Path to ffmpeg (adjust for your system)
+FFMPEG="/opt/homebrew/bin/ffmpeg"
+
+# Loop through each selected video
+for input_file in "$@"
+do
+    # Get directory and filename
+    dir=$(dirname "$input_file")
+    filename=$(basename "$input_file")
+    name="${filename%.*}"
+    ext="${filename##*.}"
+    
+    # Create output filename
+    output_file="${dir}/${name}_compressed.${ext}"
+    
+    # Compress video
+    "$FFMPEG" -i "$input_file" \
+        -c:v libx264 \
+        -crf 23 \
+        -preset medium \
+        -c:a aac \
+        -b:a 128k \
+        -movflags +faststart \
+        "$output_file" \
+        -y
+    
+    # Show notification when done
+    osascript -e "display notification \"Compressed: $filename\" with title \"Video Compression Complete\""
+done
